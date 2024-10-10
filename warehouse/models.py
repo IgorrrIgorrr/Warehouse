@@ -11,7 +11,7 @@ class Product(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     description: Mapped[str] = mapped_column()
-    price: Mapped[int] = mapped_column()
+    price: Mapped[float] = mapped_column()
     stock: Mapped[int] = mapped_column()
     
     order_itemss:Mapped[List["OrderItem"]] = relationship(back_populates="product")
