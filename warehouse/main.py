@@ -26,49 +26,64 @@ def create_product(product_data:ProductCreate, db:Annotated[Session, Depends(get
 
 @app.get("/products", response_model=List[ProductReturn])
 def get_products(db:Annotated[Session, Depends(get_db)]):
-    products = db.query(Product).all()
-    if not products:
-        raise HTTPException(status_code=404, detail="No products found")
-    return products
+    try:    
+        products = db.query(Product).all()
+        if not products:
+            raise HTTPException(status_code=404, detail="No products found")
+        return products
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while getting products")
+  
 
 
 @app.get("/products/{id}", response_model=ProductReturn)
 def get_product_by_id(id:int, db:Annotated[Session, Depends(get_db)]):
-    product_data = db.query(Product).filter(Product.id == id).first()
-    if product_data is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product_data
+    try:
+        product_data = db.query(Product).filter(Product.id == id).first()
+        if product_data is None:
+            raise HTTPException(status_code=404, detail="Product not found")
+        return product_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while getting the product")
 
 
 @app.put("/products/{id}", response_model=ProductReturn)
 def update_product(id:int, product_update: ProductUpdate, db:Annotated[Session, Depends(get_db)]):
-    product_data = db.query(Product).filter(Product.id == id).first()
-    
-    if product_data is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    if product_update.name is not None:
-        product_data.name = product_update.name
-    if product_update.description is not None:
-        product_data.description = product_update.description
-    if product_update.price is not None:
-        product_data.price = product_update.price
-    if product_update.stock is not None:
-        product_data.stock = product_update.stock
-    
-    db.commit()
-    db.refresh(product_data)
-    return product_data
+    try:
+        product_data = db.query(Product).filter(Product.id == id).first()
+        
+        if product_data is None:
+            raise HTTPException(status_code=404, detail="Product not found")
+        
+        if product_update.name is not None:
+            product_data.name = product_update.name
+        if product_update.description is not None:
+            product_data.description = product_update.description
+        if product_update.price is not None:
+            product_data.price = product_update.price
+        if product_update.stock is not None:
+            product_data.stock = product_update.stock
+        
+        db.commit()
+        db.refresh(product_data)
+        return product_data
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="An error occurred while updating the product")
 
 
 @app.delete("/products/{id}")
 def delete_product(db:Annotated[Session, Depends(get_db)]):
-    product_data = db.query(Product).filter(Product.id == id).first()
-    if product_data is None:
-        raise HTTPException(status_code= 404, detail= "Product not found")
-    db.delete(product_data)
-    db.commit()
-    return
+    try:
+        product_data = db.query(Product).filter(Product.id == id).first()
+        if product_data is None:
+            raise HTTPException(status_code= 404, detail= "Product not found")
+        db.delete(product_data)
+        db.commit()
+        return
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="An error occurred while deleting the product")
 
 
 
