@@ -1,7 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, String
 from typing import List
-
+from datetime import datetime
 
 class Base(DeclarativeBase):
     pass
@@ -9,20 +9,20 @@ class Base(DeclarativeBase):
 class Product(Base):
     __tablename__ = "products"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column()
-    description: Mapped[str] = mapped_column()
+    name: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str] = mapped_column(String(255))
     price: Mapped[float] = mapped_column()
     stock: Mapped[int] = mapped_column()
     
-    order_itemss:Mapped[List["OrderItem"]] = relationship(back_populates="product")
+    order_items:Mapped[List["OrderItem"]] = relationship(back_populates="product")
 
 class Order(Base):
     __tablename__ = "orders"
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[int] = mapped_column()
-    status: Mapped[str] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now())
+    status: Mapped[str] = mapped_column(String(255), default="in process")
 
-    order_itemss:Mapped[List["OrderItem"]] = relationship(back_populates="order")
+    order_items:Mapped[List["OrderItem"]] = relationship(back_populates="order")
 
 class OrderItem(Base):
     __tablename__ = "order_items"
@@ -31,8 +31,8 @@ class OrderItem(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     amount: Mapped[int] = mapped_column()
 
-    order: Mapped[Order] = relationship("Order", back_populates="order_itemss")
-    product: Mapped[Product] = relationship("Product", back_populates="order_itemss")
+    order: Mapped[Order] = relationship("Order", back_populates="order_items")
+    product: Mapped[Product] = relationship("Product", back_populates="order_items")
 
 
 
