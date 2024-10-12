@@ -22,20 +22,15 @@ class ProductReturn(BaseModel):
 
 
 class ProductUpdate(BaseModel):
-    name:None | None
-    description:str | None 
-    price:float | None
-    stock:int | None
-
-
-
-
-
+    name:str | None = None
+    description:str | None = None 
+    price:float | None = None
+    stock:int | None = None
 
 
 class OrderItemBase(BaseModel):
     product_id: int
-    quantity: int
+    amount: int
 
 
 class OrderCreate(BaseModel):
@@ -50,7 +45,7 @@ class OrderReturn(BaseModel):
     id: int
     created_at: datetime
     status: str
-    items: List[OrderItemReturn]
+    order_items: List[OrderItemReturn]
 
     class Config:
         orm_mode = True

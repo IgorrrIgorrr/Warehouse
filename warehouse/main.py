@@ -89,11 +89,11 @@ def create_order(order: OrderCreate, db: Annotated[Session, Depends(get_db)]):
             product = db.query(Product).filter(Product.id == item.product_id).first()
             if product is None:
                 raise HTTPException(status_code=404, detail=f"Product with id {item.product_id} not found")
-            if product.stock < item.quantity:
+            if product.stock < item.amount:
                 raise HTTPException(status_code=400, detail=f"Not enough stock for product {item.product_id}")
 
-            product.stock -= item.quantity
-            order_items.append(OrderItem(product_id=item.product_id, amount=item.quantity))
+            product.stock -= item.amount
+            order_items.append(OrderItem(product_id=item.product_id, amount=item.amount))
 
         db_order = Order()  
         db.add(db_order)
