@@ -5,6 +5,8 @@ from typing import Annotated, List, Optional
 from warehouse.models import Base, Product, Order, OrderItem
 from warehouse.database import engine, get_db
 from warehouse.schemas import ProductCreate, ProductReturn, ProductUpdate, OrderCreate, OrderItemBase, OrderReturn, OrderStatusUpdate
+from warehouse import crud
+
 
 app = FastAPI()
 
@@ -13,23 +15,12 @@ Base.metadata.create_all(bind=engine)
 
 @app.post("/products")
 def create_product(product_data:ProductCreate, db:Annotated[Session, Depends(get_db)]):
-    try:
-        new_product = Product(name = product_data.name, description = product_data.description, price = product_data.price, stock = product_data.stock)
-        db.add(new_product)
-        db.commit()
-        db.refresh(new_product)
-        return new_product
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="An error occurred while creating the product")
-
+    return crud.create_product(product_data, db)
+    
 
 @app.get("/products", response_model=List[ProductReturn])
 def get_products(db:Annotated[Session, Depends(get_db)]):
-    products = db.query(Product).all()
-    if not products:
-        raise HTTPException(status_code=404, detail="No products found")
-    return products
+    return crud.get_products(db)
 
 
 
