@@ -35,8 +35,8 @@ class Service():
             if product.stock < item.amount:
                 return None
             product.stock -= item.amount
-            self._order_repository._session.commit()
             order_items.append(OrderItem(product_id=item.product_id, amount=item.amount))
+        self._order_repository._session.commit()    
         self._order_repository.create_order(order_items)
 
     def see_orders(self):
