@@ -36,7 +36,7 @@ class Service():
                 return None
             product.stock -= item.amount
             order_items.append(OrderItem(product_id=item.product_id, amount=item.amount))
-        self._order_repository._session.commit()    
+        self._product_repository._session.commit()    
         self._order_repository.create_order(order_items)
 
     def see_orders(self):
