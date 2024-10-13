@@ -2,6 +2,7 @@ from warehouse.database import get_db
 from warehouse.models import Product, Order, OrderItem 
 from warehouse.schemas import ProductCreate, ProductUpdate, OrderCreate, OrderStatusUpdate
 from fastapi import HTTPException
+from typing import List
 
 class ProductRepository():
     def __init__(self, session: get_db):
@@ -49,17 +50,9 @@ class OrderRepository():
     def __init__(self, session: get_db):
         self._session = session
 
-    def create_order(self, order: OrderCreate):
-        order_items = []
-        for item in order.item:
-            product = self._session.query(Product).filter(Product.id == item.product_id).first()
-            if product is None:
-                raise HTTPException(status_code=404, detail=f"Product with id {item.product_id} not found") # убрать ли)))))
-            if product.stock < item.amount:
-                raise HTTPException(status_code=400, detail=f"Not enough stock for product {item.product_id}")
-
-            product.stock -= item.amount
-            order_items.append(OrderItem(product_id=item.product_id, amount=item.amount))
+    def create_order(self, order_items:List[OrderItem]): #тут!!!!!!!!!!!!!!!!!
+        
+        
 
         db_order = Order()  
         self._session.add(db_order)
