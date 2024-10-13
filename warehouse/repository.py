@@ -74,7 +74,7 @@ class OrderRepository():
         return db_order
 
 
-    def get_orders(self, Order):
+    def get_orders(self):
         return self._session.query(Order).all()
     
     def get_order_by_id(self, id:int):
