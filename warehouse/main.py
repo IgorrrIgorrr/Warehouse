@@ -15,21 +15,22 @@ Base.metadata.create_all(bind=engine)
 
 @app.post("/products")
 def create_product(product_data:ProductCreate, db:Annotated[Session, Depends(get_db)]):
-    return crud.create_product(product_data, db)
+    try:
+        return crud.create_product_in_db(product_data, db)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="An error occurred while creating the product")
     
 
 @app.get("/products", response_model=List[ProductReturn])
-def get_products(db:Annotated[Session, Depends(get_db)]):
-    return crud.get_products(db)
+def get_products(db:Annotated[Session, Depends(get_db)]):   
+    return crud.get_products_from_db(db)
 
 
 
 @app.get("/products/{id}", response_model=ProductReturn)
 def get_product_by_id(id:int, db:Annotated[Session, Depends(get_db)]):
-    product_data = db.query(Product).filter(Product.id == id).first()
-    if product_data is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product_data
+    return crud.get_product_by_id(id, db)
    
 
 @app.put("/products/{id}", response_model=ProductReturn)

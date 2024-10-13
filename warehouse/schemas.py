@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
@@ -18,7 +18,7 @@ class ProductReturn(BaseModel):
 
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ProductUpdate(BaseModel):
@@ -48,7 +48,7 @@ class OrderReturn(BaseModel):
     order_items: List[OrderItemReturn]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class OrderStatusUpdate(BaseModel):
