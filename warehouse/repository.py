@@ -44,6 +44,7 @@ class ProductRepository():
         product_for_deletion = self._session.query(Product).filter(Product.id == id).first()
         self._session.delete(product_for_deletion)
         self._session.commit()
+        return {"reply":f"product with id {id} was deleted"}
        
 
 class OrderRepository():
@@ -51,9 +52,6 @@ class OrderRepository():
         self._session = session
 
     def create_order(self, order_items:List[OrderItem]): #тут!!!!!!!!!!!!!!!!!
-        
-        
-
         db_order = Order()  
         self._session.add(db_order)
         self._session.commit()

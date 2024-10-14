@@ -8,6 +8,7 @@ from warehouse.schemas import ProductCreate, ProductReturn, ProductUpdate, Order
 from warehouse import crud
 from warehouse.repository import ProductRepository, OrderRepository
 from warehouse.service import Service
+from warehouse.exceptions import ProductNotFoundError, InsufficientStockError
 from typing import Annotated
 
 
@@ -56,8 +57,15 @@ def delete_product(id:int, service:Annotated[Service, Depends(get_service)]):
 
 @app.post("/orders", response_model=OrderReturn)
 def create_order(order: OrderCreate, service:Annotated[Service, Depends(get_service)]):
-    return service.make_order(order)
-
+    try:
+        reslut = service.make_order(order) 
+        return reslut
+    except ProductNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except InsufficientStockError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.") 
 
 @app.get("/orders", response_model= List[OrderReturn])
 def get_orders(service:Annotated[Service, Depends(get_service)]):
