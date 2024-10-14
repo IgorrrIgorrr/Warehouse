@@ -6,11 +6,31 @@ from warehouse.models import Base, Product, Order, OrderItem
 from warehouse.database import engine, get_db
 from warehouse.schemas import ProductCreate, ProductReturn, ProductUpdate, OrderCreate, OrderItemBase, OrderReturn, OrderStatusUpdate
 from warehouse import crud
+from warehouse.repository import ProductRepository, OrderRepository
+from warehouse.service import Service
+from typing import Annotated
+
 
 
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
+
+
+def get_product_repository(db:Annotated[Session, Depends(get_db)]) -> ProductRepository:
+    return ProductRepository(db)
+
+def get_order_repository(db:Annotated[Session, Depends(get_db)]) -> OrderRepository:
+    return OrderRepository(db)
+
+
+def get_service(prod_rep:Annotated[ProductRepository, Depends(get_product_repository)], ord_rep:Annotated[OrderRepository, Depends(get_order_repository)]) -> Service:
+    return Service(prod_rep, ord_rep)
+
+              
+
+
+
 
 
 @app.post("/products")
