@@ -83,4 +83,4 @@ def test_delete_product(client):
     product_id = 1  # Подставьте корректный ID продукта
     response = client.delete(f"/products/{product_id}")
     assert response.status_code == 200
-    assert response.json()["detail"] == "Product deleted successfully"
+    assert response.json()["reply"] == f"product with id {product_id} was deleted"

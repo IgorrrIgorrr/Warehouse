@@ -1,11 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import select
-from typing import Annotated, List, Optional
-from warehouse.models import Base, Product, Order, OrderItem
+from typing import Annotated, List
+from warehouse.models import Base
 from warehouse.database import engine, get_db
-from warehouse.schemas import ProductCreate, ProductReturn, ProductUpdate, OrderCreate, OrderItemBase, OrderReturn, OrderStatusUpdate
-from warehouse import crud
+from warehouse.schemas import ProductCreate, ProductReturn, ProductUpdate, OrderCreate, OrderReturn, OrderStatusUpdate
 from warehouse.repository import ProductRepository, OrderRepository
 from warehouse.service import Service
 from warehouse.exceptions import ProductNotFoundError, InsufficientStockError

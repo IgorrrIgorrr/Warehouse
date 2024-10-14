@@ -1,7 +1,6 @@
 from warehouse.database import get_db
 from warehouse.models import Product, Order, OrderItem 
 from warehouse.schemas import ProductCreate, ProductUpdate, OrderCreate, OrderStatusUpdate
-from fastapi import HTTPException
 from typing import List
 
 class ProductRepository():
