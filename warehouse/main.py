@@ -54,73 +54,22 @@ def delete_product(id:int, service:Annotated[Service, Depends(get_service)]):
     return service.delete_product(id)
 
 
-
-
-
-
-
 @app.post("/orders", response_model=OrderReturn)
-def create_order(order: OrderCreate, db: Annotated[Session, Depends(get_db)]):
-    try:
-        order_items = []
-        for item in order.items:
-            product = db.query(Product).filter(Product.id == item.product_id).first()
-            if product is None:
-                raise HTTPException(status_code=404, detail=f"Product with id {item.product_id} not found")
-            if product.stock < item.amount:
-                raise HTTPException(status_code=400, detail=f"Not enough stock for product {item.product_id}")
-
-            product.stock -= item.amount
-            order_items.append(OrderItem(product_id=item.product_id, amount=item.amount))
-
-        db_order = Order()  
-        db.add(db_order)
-        db.commit()
-        db.refresh(db_order)
-
-        for order_item in order_items:
-            order_item.order_id = db_order.id  
-            db.add(order_item)
-
-        db.commit() 
-        return db_order  
-
-    except Exception as e:
-        db.rollback() 
-        raise HTTPException(status_code=500, detail=str(e))  
-    
-
+def create_order(order: OrderCreate, service:Annotated[Service, Depends(get_service)]):
+    return service.make_order(order)
 
 
 @app.get("/orders", response_model= List[OrderReturn])
-def get_orders(db:Annotated[Session, Depends(get_db)]):
-    orders = db.query(Order).all()
-    return orders
-
+def get_orders(service:Annotated[Service, Depends(get_service)]):
+    return service.see_orders()
 
 
 @app.get("/orders/{id}", response_model=OrderReturn)
-def get_order_by_id(id:int, db:Annotated[Session, Depends(get_db)]):
-    order = db.query(Order).filter(Order.id == id).first()
-    if order is None:
-            raise HTTPException(status_code=404, detail=f"Order with id {id} not found")
-    return order
+def get_order_by_id(id:int, service:Annotated[Service, Depends(get_service)]):
+    return service.get_special_order(id)
 
 
 @app.patch("/orders/{id}/status")
-def update_order_status(id:int, status: OrderStatusUpdate, db:Annotated[Session, Depends(get_db)]):
-        try:
-            order = db.query(Order).filter(Order.id == id).first()
-        
-            if order is None:
-                raise HTTPException(status_code=404, detail="Order not found")
-
-            order.status = status.status
-            db.commit()
-            db.refresh(order)
-
-            return {"order_id": order.id, "status": order.status}
-        except Exception as e:
-            db.rollback()  
-            raise HTTPException(status_code=500, detail=str(e))
+def update_order_status(id:int, status: OrderStatusUpdate, service:Annotated[Service, Depends(get_service)]):
+    return service.update_status(id, status)
 
