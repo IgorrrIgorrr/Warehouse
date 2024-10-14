@@ -76,7 +76,7 @@ class OrderRepository():
         order_for_update.status = status.status
         self._session.commit()
         self._session.refresh(order_for_update)
-
+        return {"new status":f"{status.status}"}
 
 
 

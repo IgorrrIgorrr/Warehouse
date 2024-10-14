@@ -44,10 +44,10 @@ class Service():
         return self._order_repository.get_orders()
 
     def get_special_order(self, id:int):
-        self._order_repository.get_order_by_id(id)
+        return self._order_repository.get_order_by_id(id)
 
     def update_status(self, id:int, status:OrderStatusUpdate):
-        self._order_repository.update_order_status(id, status)
+        return self._order_repository.update_order_status(id, status)
 
 
         

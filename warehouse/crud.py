@@ -5,7 +5,7 @@ from typing import Annotated, List, Optional
 from warehouse.models import Base, Product, Order, OrderItem
 from warehouse.database import engine, get_db
 from warehouse.schemas import ProductCreate, ProductReturn, ProductUpdate, OrderCreate, OrderItemBase, OrderReturn, OrderStatusUpdate
-from warehouse.exceptions import DatabaseError
+
 
 
 

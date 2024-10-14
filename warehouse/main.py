@@ -35,17 +35,17 @@ def create_product(product_data:ProductCreate, service:Annotated[Service, Depend
     return service.create_product(product_data)   
 
 
-@app.get("/products", response_model=List[ProductReturn])
+@app.get("/products", response_model=List[ProductReturn])     
 def get_products(service:Annotated[Service, Depends(get_service)]):   
     return service.get_products()
 
 
-@app.get("/products/{id}", response_model=ProductReturn)
+@app.get("/products/{id}", response_model=ProductReturn)  # TODO добавить ошибку, если нету продукта
 def get_product_by_id(id:int, service:Annotated[Service, Depends(get_service)]):
     return service.get_product_info(id)
    
 
-@app.put("/products/{id}", response_model=ProductReturn)
+@app.put("/products/{id}", response_model=ProductReturn) # TODO добавить ошибку, если нету продукта
 def update_product(id:int, product_update: ProductUpdate, service:Annotated[Service, Depends(get_service)]):
     return service.update_product(id, product_update)
 
