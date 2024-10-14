@@ -10,7 +10,7 @@ class ProductRepository():
     
     def add_product(self, product_data: ProductCreate):
         new_product = Product(name = product_data.name, description = product_data.description, price = product_data.price, stock = product_data.stock)
-        self._session.add(Product)
+        self._session.add(new_product)
         self._session.commit()
         self._session.refresh(new_product)
         return new_product

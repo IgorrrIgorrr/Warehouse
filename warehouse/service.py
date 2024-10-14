@@ -8,16 +8,16 @@ class Service():
         self._order_repository = ord_rep
 
     def create_product(self, product: ProductCreate):
-        self._product_repository.add_product(product)
+        return self._product_repository.add_product(product)
 
     def get_products(self):
-        self._product_repository.get_products_list()
+        return self._product_repository.get_products_list()
 
     def get_product_info(self, id: int):
-        self._product_repository.get_product_by_id(id)
+        return self._product_repository.get_product_by_id(id)
 
     def update_product(self, id:int, product_data:ProductUpdate):
-        self._product_repository.update_product(id, product_data)
+        return self._product_repository.update_product(id, product_data)
 
     def delete_product(self, id:int):
         self._product_repository.delete_product(id)
