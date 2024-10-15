@@ -24,8 +24,8 @@ class OrderRepository():
         return db_order
 
 
-    def get_orders(self)-> list[Order]:
-        return self._session.query(Order).all()
+    def get_orders(self, limit: int, offset: int)-> list[Order]:
+        return self._session.query(Order).limit(limit).offset(offset).all()
     
     def get_order_by_id(self, id:int) -> Order:
         return self._session.query(Order).filter(Order.id == id).first()

@@ -13,11 +13,11 @@ class ProductRepository():
         self._session.refresh(new_product)
         return new_product
 
-    def get_products_list(self) -> list[Product]:
-        return self._session.query(Product).all() # обработать пустоту в сервисе
+    def get_products_list(self, limit: int, offset: int) -> list[Product]:
+        return self._session.query(Product).limit(limit).offset(offset).all() 
 
     def get_product_by_id(self, id: int) -> Product:
-        return self._session.query(Product).filter(Product.id == id).first() # если не будет обработать
+        return self._session.query(Product).filter(Product.id == id).first() 
 
     def update_product(self, id:int, product_new_data: ProductUpdate) -> Product:
         product_updated = self._session.query(Product).filter(Product.id == id).first()

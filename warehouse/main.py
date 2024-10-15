@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from typing import Annotated
 from warehouse.models import Base, Product, Order
 from warehouse.database import engine, get_db
@@ -20,8 +20,8 @@ def create_product(product_data:ProductCreate, service:Annotated[Service, Depend
 
 
 @app.get("/products", response_model=list[ProductReturn])     
-def get_products(service:Annotated[Service, Depends(get_service)]) -> list[Product]:   
-    return service.get_products()
+def get_products(service:Annotated[Service, Depends(get_service)],page: int = Query(1, ge=1), limit: int = Query(10, ge=1)) -> list[Product]:   
+    return service.get_products(page, limit)
 
 
 @app.get("/products/{id}", response_model=ProductReturn)  # TODO добавить ошибку, если нету продукта
@@ -51,8 +51,8 @@ def create_order(order: OrderCreate, service:Annotated[Service, Depends(get_serv
         return result
 
 @app.get("/orders", response_model= list[OrderReturn])
-def get_orders(service:Annotated[Service, Depends(get_service)]):
-    return service.list_orders()
+def get_orders(service:Annotated[Service, Depends(get_service)],page: int = Query(1, ge=1), limit: int = Query(10, ge=1)):
+    return service.list_orders(page, limit)
 
 
 @app.get("/orders/{id}", response_model=OrderReturn)

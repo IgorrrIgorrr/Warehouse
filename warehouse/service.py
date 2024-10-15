@@ -13,8 +13,10 @@ class Service():
     def create_product(self, product: ProductCreate) -> Product:
         return self._product_repository.add_product(product)
 
-    def get_products(self) -> list[Product]:
-        return self._product_repository.get_products_list()
+    def get_products(self, page:int, limit: int) -> list[Product]:
+        offset = (page - 1) * limit
+        return self._product_repository.get_products_list(limit, offset)
+         
 
     def get_product_info(self, id: int) -> Product:
         return self._product_repository.get_product_by_id(id)
@@ -41,8 +43,9 @@ class Service():
             order_items.append(OrderItem(product_id=item.product_id, amount=item.amount))
         return self._order_repository.create_order(order_items)
 
-    def list_orders(self) -> list[Order]:
-        return self._order_repository.get_orders()
+    def list_orders(self, page:int, limit: int) -> list[Order]:
+        offset = (page - 1) * limit
+        return self._order_repository.get_orders(limit, offset)
 
     def get_special_order(self, id:int) -> Order:
         return self._order_repository.get_order_by_id(id)
