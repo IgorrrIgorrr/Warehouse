@@ -41,7 +41,6 @@ def setup_products(client):
     product = {"name": "Product 4", "description": "Test product", "price": 10.0, "stock": 100}
     response = client.post("/products", json=product)
     assert response.status_code == 200
-    print("--------------------", response.json()["id"])
     return response.json()["id"]  
 
 @pytest.fixture(scope="module")
@@ -53,9 +52,8 @@ def setup_order(client, setup_products):
         ]
     }
     response = client.post("/orders", json=order_data)
-    print("/////////////////////", response.json()) 
     assert response.status_code == 200
-    return response.json()["id"] 
+    return response.json()
 
 def test_create_product(client):
     product_data = {
@@ -130,7 +128,7 @@ def test_get_orders(client):
     assert isinstance(orders, list)
 
 def test_get_order_by_id(client, setup_order):
-    order_id = setup_order 
+    order_id = setup_order["id"] 
     response = client.get(f"/orders/{order_id}")
     assert response.status_code == 200
     order = response.json()

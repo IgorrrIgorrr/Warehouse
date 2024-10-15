@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
 from datetime import datetime
 
 
@@ -34,7 +33,7 @@ class OrderItemBase(BaseModel):
 
 
 class OrderCreate(BaseModel):
-    items: List[OrderItemBase]
+    items: list[OrderItemBase]
 
 
 class OrderItemReturn(OrderItemBase):
@@ -45,7 +44,7 @@ class OrderReturn(BaseModel):
     id: int
     created_at: datetime
     status: str
-    order_items: List[OrderItemReturn]
+    order_items: list[OrderItemReturn]
 
     class Config:
         from_attributes = True

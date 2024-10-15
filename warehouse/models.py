@@ -1,6 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, String
-from typing import List
 from datetime import datetime
 
 class Base(DeclarativeBase):
@@ -14,7 +13,7 @@ class Product(Base):
     price: Mapped[float] = mapped_column()
     stock: Mapped[int] = mapped_column()
     
-    order_items:Mapped[List["OrderItem"]] = relationship(back_populates="product")
+    order_items:Mapped[list["OrderItem"]] = relationship(back_populates="product")
 
 class Order(Base):
     __tablename__ = "orders"
@@ -22,7 +21,7 @@ class Order(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.now())
     status: Mapped[str] = mapped_column(String(255), default="in process")
 
-    order_items:Mapped[List["OrderItem"]] = relationship(back_populates="order")
+    order_items:Mapped[list["OrderItem"]] = relationship(back_populates="order")
 
 class OrderItem(Base):
     __tablename__ = "order_items"
