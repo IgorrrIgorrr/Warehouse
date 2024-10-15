@@ -1,5 +1,3 @@
-# test_main.py
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -37,6 +35,28 @@ def client(test_db):
     yield client
     app.dependency_overrides.clear()
 
+
+@pytest.fixture(scope="module")
+def setup_products(client):
+    product = {"name": "Product 4", "description": "Test product", "price": 10.0, "stock": 100}
+    response = client.post("/products", json=product)
+    assert response.status_code == 200
+    print("--------------------", response.json()["id"])
+    return response.json()["id"]  
+
+@pytest.fixture(scope="module")
+def setup_order(client, setup_products):
+    product_id = setup_products  
+    order_data = {
+        "items": [
+            {"product_id": product_id, "amount": 1} 
+        ]
+    }
+    response = client.post("/orders", json=order_data)
+    print("/////////////////////", response.json()) 
+    assert response.status_code == 200
+    return response.json()["id"] 
+
 def test_create_product(client):
     product_data = {
         "name": "Test Product",
@@ -59,28 +79,69 @@ def test_get_products(client):
     assert isinstance(products, list)
     assert len(products) > 0
 
-def test_get_product_by_id(client):
-    product_id = 1  
+def test_get_product_by_id(client, setup_products):
+    product_id = setup_products  
     response = client.get(f"/products/{product_id}")
     assert response.status_code == 200
     product = response.json()
     assert product["id"] == product_id
 
-def test_update_product(client):
+def test_update_product(client, setup_products):
     product_update_data = {
         "name": "Updated Product",
         "description": "Updated description",
         "price": 150.0,
         "stock": 20
     }
-    product_id = 1  
+    product_id = setup_products  
     response = client.put(f"/products/{product_id}", json=product_update_data)
     assert response.status_code == 200
     updated_product = response.json()
     assert updated_product["name"] == product_update_data["name"]
 
-def test_delete_product(client):
-    product_id = 1  # Подставьте корректный ID продукта
+def test_delete_product(client, setup_products):
+    product_id = setup_products
     response = client.delete(f"/products/{product_id}")
     assert response.status_code == 200
     assert response.json()["reply"] == f"product with id {product_id} was deleted"
+
+
+def test_create_order(client):
+    product_4 = client.get("/products/4")
+    assert product_4.status_code == 200
+    product_5 = client.get("/products/5")
+    assert product_5.status_code == 200
+    order_data = {
+        "items": [
+            {"product_id": 4, "amount": 1},
+            {"product_id": 5, "amount": 1}
+        ]
+    }
+    response = client.post("/orders", json=order_data)
+    assert response.status_code == 200
+    response_json = response.json()
+    assert isinstance(response_json["order_items"], list)
+    assert len(response_json["order_items"]) == 2
+
+def test_get_orders(client):
+    response = client.get("/orders")
+    assert response.status_code == 200
+    orders = response.json()
+    assert isinstance(orders, list)
+
+def test_get_order_by_id(client, setup_order):
+    order_id = setup_order 
+    response = client.get(f"/orders/{order_id}")
+    assert response.status_code == 200
+    order = response.json()
+    assert order["id"] == order_id
+
+
+def test_update_order_status(client, setup_order):
+    order_id = setup_order 
+    new_status = {"status": "shipped"} 
+    response = client.patch(f"/orders/{order_id}/status", json=new_status)
+    assert response.status_code == 200
+    updated_order = response.json()
+    assert updated_order["status"] == new_status["status"] 
+
