@@ -15,6 +15,12 @@ test_session = sessionmaker(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 @pytest.fixture(scope="module")
+def headers():
+    return {
+        "x-api-key": "abc123" 
+    }
+
+@pytest.fixture(scope="module")
 def test_db():
     db = test_session()
     try:
@@ -37,32 +43,35 @@ def client(test_db):
 
 
 @pytest.fixture(scope="module")
-def setup_products(client):
+def setup_products(client, headers):
     product = {"name": "Product 4", "description": "Test product", "price": 10.0, "stock": 100}
-    response = client.post("/products", json=product)
+    response = client.post("/products", json=product, headers=headers)
     assert response.status_code == 200
     return response.json()["id"]  
 
 @pytest.fixture(scope="module")
-def setup_order(client, setup_products):
+def setup_order(client, setup_products, headers):
     product_id = setup_products  
     order_data = {
         "items": [
             {"product_id": product_id, "amount": 1} 
         ]
     }
-    response = client.post("/orders", json=order_data)
+    response = client.post("/orders", json=order_data, headers=headers)
     assert response.status_code == 200
     return response.json()
 
-def test_create_product(client):
+
+
+
+def test_create_product(client, headers):
     product_data = {
         "name": "Test Product",
         "description": "A product for testing",
         "price": 100.0,
         "stock": 10
     }
-    response = client.post("/products", json=product_data)
+    response = client.post("/products", json=product_data, headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == product_data["name"]
@@ -70,21 +79,21 @@ def test_create_product(client):
     assert data["price"] == product_data["price"]
     assert data["stock"] == product_data["stock"]
 
-def test_get_products(client):
-    response = client.get("/products")
+def test_get_products(client, headers):
+    response = client.get("/products", headers=headers)
     assert response.status_code == 200
     products = response.json()
     assert isinstance(products, list)
     assert len(products) > 0
 
-def test_get_product_by_id(client, setup_products):
+def test_get_product_by_id(client, setup_products, headers):
     product_id = setup_products  
-    response = client.get(f"/products/{product_id}")
+    response = client.get(f"/products/{product_id}", headers=headers)
     assert response.status_code == 200
     product = response.json()
     assert product["id"] == product_id
 
-def test_update_product(client, setup_products):
+def test_update_product(client, setup_products, headers):
     product_update_data = {
         "name": "Updated Product",
         "description": "Updated description",
@@ -92,22 +101,22 @@ def test_update_product(client, setup_products):
         "stock": 20
     }
     product_id = setup_products  
-    response = client.put(f"/products/{product_id}", json=product_update_data)
+    response = client.put(f"/products/{product_id}", json=product_update_data, headers=headers)
     assert response.status_code == 200
     updated_product = response.json()
     assert updated_product["name"] == product_update_data["name"]
 
-def test_delete_product(client, setup_products):
+def test_delete_product(client, setup_products, headers):
     product_id = setup_products
-    response = client.delete(f"/products/{product_id}")
+    response = client.delete(f"/products/{product_id}", headers=headers)
     assert response.status_code == 200
     assert response.json()["reply"] == f"product with id {product_id} was deleted"
 
 
-def test_create_order(client):
-    product_4 = client.get("/products/4")
+def test_create_order(client, headers):
+    product_4 = client.get("/products/4", headers=headers)
     assert product_4.status_code == 200
-    product_5 = client.get("/products/5")
+    product_5 = client.get("/products/5", headers=headers)
     assert product_5.status_code == 200
     order_data = {
         "items": [
@@ -115,30 +124,30 @@ def test_create_order(client):
             {"product_id": 5, "amount": 1}
         ]
     }
-    response = client.post("/orders", json=order_data)
+    response = client.post("/orders", json=order_data, headers=headers)
     assert response.status_code == 200
     response_json = response.json()
     assert isinstance(response_json["order_items"], list)
     assert len(response_json["order_items"]) == 2
 
-def test_get_orders(client):
-    response = client.get("/orders")
+def test_get_orders(client, headers):
+    response = client.get("/orders", headers=headers)
     assert response.status_code == 200
     orders = response.json()
     assert isinstance(orders, list)
 
-def test_get_order_by_id(client, setup_order):
+def test_get_order_by_id(client, setup_order, headers):
     order_id = setup_order["id"] 
-    response = client.get(f"/orders/{order_id}")
+    response = client.get(f"/orders/{order_id}", headers=headers)
     assert response.status_code == 200
     order = response.json()
     assert order["id"] == order_id
 
 
-def test_update_order_status(client, setup_order):
+def test_update_order_status(client, setup_order, headers):
     order_id = setup_order 
     new_status = {"status": "shipped"} 
-    response = client.patch(f"/orders/{order_id}/status", json=new_status)
+    response = client.patch(f"/orders/{order_id}/status", json=new_status, headers=headers)
     assert response.status_code == 200
     updated_order = response.json()
     assert updated_order["status"] == new_status["status"] 

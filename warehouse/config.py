@@ -5,7 +5,8 @@ class Settings(BaseSettings):
     DB_PASS:str 
     DB_HOST:str
     DB_PORT:str
-    DB_NAME:str 
+    DB_NAME:str
+    API_KEY:str 
 
     @property
     def DATABASE_URL(self):
