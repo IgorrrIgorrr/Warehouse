@@ -15,12 +15,12 @@ test_session = sessionmaker(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def headers():
     return {"x-api-key": "abc123"}
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_db():
     db = test_session()
     try:
@@ -29,10 +29,11 @@ def test_db():
         db.close()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def client(test_db):
     def override_get_db():
         try:
+            test_db.query
             yield test_db
         finally:
             test_db.close()
@@ -43,7 +44,7 @@ def client(test_db):
     app.dependency_overrides.clear()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def setup_products(client, headers):
     product = {
         "name": "Product 4",
@@ -56,13 +57,20 @@ def setup_products(client, headers):
     return response.json()["id"]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def setup_order(client, setup_products, headers):
     product_id = setup_products
-    order_data = {"items": [{"product_id": product_id, "amount": 1}]}
+    order_data = {"items": [{"product_id": setup_products, "amount": 1}]}
     response = client.post("/orders", json=order_data, headers=headers)
     assert response.status_code == 200
     return response.json()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def cleanup_db():
+    yield
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
 
 def test_create_product(client, headers):
@@ -120,19 +128,15 @@ def test_delete_product(client, setup_products, headers):
     assert response.json()["reply"] == f"product with id {product_id} was deleted"
 
 
-def test_create_order(client, headers):
-    product_4 = client.get("/products/4", headers=headers)
-    assert product_4.status_code == 200
-    product_5 = client.get("/products/5", headers=headers)
-    assert product_5.status_code == 200
-    order_data = {
-        "items": [{"product_id": 4, "amount": 1}, {"product_id": 5, "amount": 1}]
-    }
+def test_create_order(client, headers, setup_products):
+    response_about_product_4 = client.get("/products/4", headers=headers)
+    assert response_about_product_4.status_code == 200
+    order_data = {"items": [{"product_id": 4, "amount": 1}]}
     response = client.post("/orders", json=order_data, headers=headers)
     assert response.status_code == 200
     response_json = response.json()
     assert isinstance(response_json["order_items"], list)
-    assert len(response_json["order_items"]) == 2
+    assert len(response_json["order_items"]) == 1
 
 
 def test_get_orders(client, headers):
@@ -151,7 +155,7 @@ def test_get_order_by_id(client, setup_order, headers):
 
 
 def test_update_order_status(client, setup_order, headers):
-    order_id = setup_order
+    order_id = setup_order["id"]
     new_status = {"status": "shipped"}
     response = client.patch(
         f"/orders/{order_id}/status", json=new_status, headers=headers

@@ -28,12 +28,10 @@ class OrderRepository:
     def get_order_by_id(self, id: int) -> Order:
         return self._session.query(Order).filter(Order.id == id).first()
 
-    def get_group_of_orders_by_id(self, ids: list[int]) -> list[Product]:
-        return self._session.query(Product).filter(Product.id.in_(ids)).all()
-
     def update_order_status(self, id: int, status: OrderStatusUpdate) -> dict:
         order_for_update = self._session.query(Order).filter(Order.id == id).first()
+
         order_for_update.status = status.status
         self._session.commit()
         self._session.refresh(order_for_update)
-        return {"new status": status.status}
+        return {"status": status.status}

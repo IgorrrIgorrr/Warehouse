@@ -33,11 +33,10 @@ class Service:
 
     def make_order(self, order: OrderCreate) -> Order:
         product_ids_from_order = [item.product_id for item in order.items]
-        products_that_matches_ids = self._order_repository.get_group_of_orders_by_id(
-            product_ids_from_order
+        products_that_matches_ids = (
+            self._product_repository.get_group_of_products_by_id(product_ids_from_order)
         )
         products_dict = {product.id: product for product in products_that_matches_ids}
-
         order_items = []
         for item in order.items:
             product = products_dict.get(item.product_id)

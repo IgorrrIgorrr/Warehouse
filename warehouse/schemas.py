@@ -33,10 +33,6 @@ class OrderItemBase(BaseModel):
     amount: int
 
 
-class OrderCreate(BaseModel):
-    items: list[OrderItemBase]
-
-
 class OrderItemReturn(OrderItemBase):
     id: int
 
@@ -49,6 +45,10 @@ class OrderReturn(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class OrderCreate(BaseModel):
+    items: list[OrderItemBase]
 
 
 class OrderStatusUpdate(BaseModel):

@@ -2,7 +2,7 @@
 
 from warehouse.database import get_db
 from warehouse.models import Product
-from warehouse.schemas import ProductCreate, ProductUpdate
+from warehouse.schemas import ProductCreate, ProductReturn, ProductUpdate
 
 
 class ProductRepository:
@@ -50,3 +50,7 @@ class ProductRepository:
         self._session.delete(product_for_deletion)
         self._session.commit()
         return {"reply": f"product with id {id} was deleted"}
+
+    def get_group_of_products_by_id(self, ids: list[int]) -> list[ProductReturn]:
+        products = self._session.query(Product.id).all()
+        return self._session.query(Product).filter(Product.id.in_(ids)).all()
