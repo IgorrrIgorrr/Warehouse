@@ -2,10 +2,10 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from warehouse.models import Base 
+
 from warehouse.database import get_db
 from warehouse.main import app
-
+from warehouse.models import Base
 
 DSN = "sqlite:///./test.db"
 engine = create_engine(DSN)
@@ -14,11 +14,11 @@ test_session = sessionmaker(bind=engine)
 
 Base.metadata.create_all(bind=engine)
 
+
 @pytest.fixture(scope="module")
 def headers():
-    return {
-        "x-api-key": "abc123" 
-    }
+    return {"x-api-key": "abc123"}
+
 
 @pytest.fixture(scope="module")
 def test_db():
@@ -27,6 +27,7 @@ def test_db():
         yield db
     finally:
         db.close()
+
 
 @pytest.fixture(scope="module")
 def client(test_db):
@@ -44,24 +45,24 @@ def client(test_db):
 
 @pytest.fixture(scope="module")
 def setup_products(client, headers):
-    product = {"name": "Product 4", "description": "Test product", "price": 10.0, "stock": 100}
+    product = {
+        "name": "Product 4",
+        "description": "Test product",
+        "price": 10.0,
+        "stock": 100,
+    }
     response = client.post("/products", json=product, headers=headers)
     assert response.status_code == 200
-    return response.json()["id"]  
+    return response.json()["id"]
+
 
 @pytest.fixture(scope="module")
 def setup_order(client, setup_products, headers):
-    product_id = setup_products  
-    order_data = {
-        "items": [
-            {"product_id": product_id, "amount": 1} 
-        ]
-    }
+    product_id = setup_products
+    order_data = {"items": [{"product_id": product_id, "amount": 1}]}
     response = client.post("/orders", json=order_data, headers=headers)
     assert response.status_code == 200
     return response.json()
-
-
 
 
 def test_create_product(client, headers):
@@ -69,7 +70,7 @@ def test_create_product(client, headers):
         "name": "Test Product",
         "description": "A product for testing",
         "price": 100.0,
-        "stock": 10
+        "stock": 10,
     }
     response = client.post("/products", json=product_data, headers=headers)
     assert response.status_code == 200
@@ -79,6 +80,7 @@ def test_create_product(client, headers):
     assert data["price"] == product_data["price"]
     assert data["stock"] == product_data["stock"]
 
+
 def test_get_products(client, headers):
     response = client.get("/products", headers=headers)
     assert response.status_code == 200
@@ -86,25 +88,30 @@ def test_get_products(client, headers):
     assert isinstance(products, list)
     assert len(products) > 0
 
+
 def test_get_product_by_id(client, setup_products, headers):
-    product_id = setup_products  
+    product_id = setup_products
     response = client.get(f"/products/{product_id}", headers=headers)
     assert response.status_code == 200
     product = response.json()
     assert product["id"] == product_id
+
 
 def test_update_product(client, setup_products, headers):
     product_update_data = {
         "name": "Updated Product",
         "description": "Updated description",
         "price": 150.0,
-        "stock": 20
+        "stock": 20,
     }
-    product_id = setup_products  
-    response = client.put(f"/products/{product_id}", json=product_update_data, headers=headers)
+    product_id = setup_products
+    response = client.put(
+        f"/products/{product_id}", json=product_update_data, headers=headers
+    )
     assert response.status_code == 200
     updated_product = response.json()
     assert updated_product["name"] == product_update_data["name"]
+
 
 def test_delete_product(client, setup_products, headers):
     product_id = setup_products
@@ -119,10 +126,7 @@ def test_create_order(client, headers):
     product_5 = client.get("/products/5", headers=headers)
     assert product_5.status_code == 200
     order_data = {
-        "items": [
-            {"product_id": 4, "amount": 1},
-            {"product_id": 5, "amount": 1}
-        ]
+        "items": [{"product_id": 4, "amount": 1}, {"product_id": 5, "amount": 1}]
     }
     response = client.post("/orders", json=order_data, headers=headers)
     assert response.status_code == 200
@@ -130,14 +134,16 @@ def test_create_order(client, headers):
     assert isinstance(response_json["order_items"], list)
     assert len(response_json["order_items"]) == 2
 
+
 def test_get_orders(client, headers):
     response = client.get("/orders", headers=headers)
     assert response.status_code == 200
     orders = response.json()
     assert isinstance(orders, list)
 
+
 def test_get_order_by_id(client, setup_order, headers):
-    order_id = setup_order["id"] 
+    order_id = setup_order["id"]
     response = client.get(f"/orders/{order_id}", headers=headers)
     assert response.status_code == 200
     order = response.json()
@@ -145,10 +151,11 @@ def test_get_order_by_id(client, setup_order, headers):
 
 
 def test_update_order_status(client, setup_order, headers):
-    order_id = setup_order 
-    new_status = {"status": "shipped"} 
-    response = client.patch(f"/orders/{order_id}/status", json=new_status, headers=headers)
+    order_id = setup_order
+    new_status = {"status": "shipped"}
+    response = client.patch(
+        f"/orders/{order_id}/status", json=new_status, headers=headers
+    )
     assert response.status_code == 200
     updated_order = response.json()
-    assert updated_order["status"] == new_status["status"] 
-
+    assert updated_order["status"] == new_status["status"]

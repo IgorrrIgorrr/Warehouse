@@ -1,30 +1,31 @@
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+
+from pydantic import BaseModel
 
 
 class ProductCreate(BaseModel):
-    name:str 
-    description:str | None 
-    price:float 
-    stock:int
+    name: str
+    description: str | None
+    price: float
+    stock: int
+
 
 class ProductReturn(BaseModel):
-    id:int
-    name:str 
-    description:str | None 
-    price:float 
-    stock:int
-
+    id: int
+    name: str
+    description: str | None
+    price: float
+    stock: int
 
     class Config:
         from_attributes = True
 
 
 class ProductUpdate(BaseModel):
-    name:str | None = None
-    description:str | None = None 
-    price:float | None = None
-    stock:int | None = None
+    name: str | None = None
+    description: str | None = None
+    price: float | None = None
+    stock: int | None = None
 
 
 class OrderItemBase(BaseModel):
@@ -37,7 +38,7 @@ class OrderCreate(BaseModel):
 
 
 class OrderItemReturn(OrderItemBase):
-    id:int
+    id: int
 
 
 class OrderReturn(BaseModel):
@@ -52,4 +53,3 @@ class OrderReturn(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: str
-
