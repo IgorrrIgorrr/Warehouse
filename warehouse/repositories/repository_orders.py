@@ -10,17 +10,20 @@ class OrderRepository:
         self._session = session
 
     def create_order(self, order_items: list[OrderItem]) -> Order:
-        db_order = Order()
-        self._session.add(db_order)
-        self._session.commit()
-        self._session.refresh(db_order)
+        try:
+            db_order = Order()
+            self._session.add(db_order)
+            self._session.flush()
 
-        for order_item in order_items:
-            order_item.order_id = db_order.id
-            self._session.add(order_item)
+            for order_item in order_items:
+                order_item.order_id = db_order.id
+                self._session.add(order_item)
 
-        self._session.commit()
-        return db_order
+            self._session.commit()
+            return db_order
+        except Exception as e:
+            self._session.rollback()
+            raise e
 
     def get_orders(self, limit: int, offset: int) -> list[Order]:
         return self._session.query(Order).limit(limit).offset(offset).all()
