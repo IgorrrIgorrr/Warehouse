@@ -1,7 +1,7 @@
 # mypy: ignore-errors
 
 from warehouse.database import get_db
-from warehouse.models import Order, OrderItem, Product
+from warehouse.models import Order, OrderItem
 from warehouse.schemas import OrderStatusUpdate
 
 
